@@ -1,0 +1,61 @@
+const_schema = {
+	price_abc: 'float',
+	price_def: 'float',
+	ratio: 'float',
+	timestamp: 'date',
+	upper_bound: 'float',
+	lower_bound: 'float',
+	trigger_alert: 'float',
+};
+
+	elem.load(this.table);
+	elem.setAttribute('view', 'y_line');
+	elem.setAttribute('row_pivots', '["timestamp"]');
+	elem.setAttribute('columns', '["ratio","upper_bound","lower_bound","trigger_alert"]');
+	elem.setAttribute('aggregates', JSON.stringify({
+		price_abc: 'avg',
+		price_def: 'avg',
+		ratio: 'avg',
+		timestamp: 'distinct count',
+		upper_bound: 'avg',
+		lower_bound: 'avg',
+		trigger_alert: 'avg',
+	}));
+}
+	componenetDisUpdate() {
+		if(this.table) {
+			this.table.update([
+					DataManipulator.generateRow(this.props.data)
+				]as unknown as TableData);
+		}
+	}
+}
+export interface Row {
+	price_abc: number,
+	price_def: number,
+	ratio: number,
+	timestamp: date,
+	upper_bound: number,
+	lower_bound: number,
+	trigger_alert: number | undefined,
+}
+	export class DataManipulator {
+		static genearateRow (serverRespond: ServerRespond[]): Row {
+			const priceabc = (serverRespond[0].top_ask.price_serverRespond[0].top_bid.price)/2;
+			const pricedef = (serverRespond[1].top_ask.price_serverRespond[1].top_bid.price)/2;
+			const ratio = priceabc/pricedef;
+			const upperbound = 1+0.1;
+			const lowerbound = 1-0.1;
+			return {
+			price_ABC = priceabc;
+			priceDEF = pricedef;
+			ratio,
+			timestamp: serverRespond[0].timestamp > serverRespond[1].timestamp?
+				serverRespond[0].timestamp: serverRespond[1].timestamp,
+			upper_bound: upperbound,
+			lower_bound: lowerbound,
+			trigger_alert: (ratio > upperbound || ratio < lowerbound) ? ratio: undefined,
+		};
+
+	}
+}
